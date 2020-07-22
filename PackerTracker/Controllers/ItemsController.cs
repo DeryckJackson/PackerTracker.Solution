@@ -9,8 +9,8 @@ namespace PackerTracker.Controllers
     [HttpGet("/items")]
     public ActionResult Index()
     {
-      List<Item> allItems = Item.GetAll();
-      return View(allItems);
+      List<Item> unpackedItems = Item.GetUnpacked();
+      return View(unpackedItems);
     }
     [HttpGet("/items/new")]
     public ActionResult New()
@@ -36,6 +36,16 @@ namespace PackerTracker.Controllers
     {
       Item foundItem = Item.Find(id);
       return View(foundItem);
+    }
+
+    [HttpPost("/items/checked")]
+    public ActionResult Checked(int[] itemIds)
+    {
+      foreach (int id in itemIds)
+      {
+        Item.SetIsPackedTrueById(id);
+      }
+      return RedirectToAction("Index");
     }
   }
 }

@@ -6,12 +6,20 @@
 {
   <p>There are no items in the packing list.</p>
 }
+
 <ul>
-  @foreach (Item item in Model)
-  {
-    <li><a href='items/@item.Id'>@item.Description</li>
-  }
+  <form action="/items/checked" method="post">
+    @foreach (Item item in Model)
+    {
+      <li>
+        <label><a href='items/@item.Id'>@item.Description</label>
+        <input type="checkbox" name="itemIds" value="@item.Id">
+      </li>
+    }
+    <button type="submit">Submit</button>
+  </form>
 </ul>
+
 
 <a href="/items/new">Add a new item.</a>
 

@@ -46,5 +46,10 @@ namespace PackerTracker.Models
       }
       return outputList;
     }
+
+    public static void SetIsPackedTrueById(int id)
+    {
+      _instances[id].IsPacked = true;
+    }
   }
 }
