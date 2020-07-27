@@ -9,7 +9,7 @@ namespace PackerTracker.Models
     public int Price { get; set; }
     public string Manufacturer { get; set; }
     public bool IsPacked { get; set; }
-    public int Id { get; }
+    public int Id { get; set; }
     public Item (string description, int price, string manufacturer, bool isPacked, int id)
     {
       Description = description;
@@ -17,6 +17,15 @@ namespace PackerTracker.Models
       Manufacturer = manufacturer;
       IsPacked = isPacked;
       Id = id;
+    }
+
+    public Item (string description, int price, string manufacturer)
+    {
+      Description = description;
+      Price = price;
+      Manufacturer = manufacturer;
+      IsPacked = false;
+      Id = 0;
     }
 
     public static List<Item> GetAll()
@@ -45,7 +54,16 @@ namespace PackerTracker.Models
     }
     public static void ClearAll()
     {
-      _instances.Clear();
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      var cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"DELETE FROM items;";
+      cmd.ExecuteNonQuery();
+      conn.Close();
+      if (conn != null)
+      {
+        conn.Dispose();
+      }
     }
 
     public static Item Find(int searchId)
@@ -69,6 +87,38 @@ namespace PackerTracker.Models
     public static void SetIsPackedTrueById(int id)
     {
       _instances[id].IsPacked = true;
+    }
+
+    public void Save()
+    {
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      var cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"INSERT INTO items (description, price, manufacturer, ispacked) VALUES (@ItemDescription, @ItemPrice, @ItemManufacturer, @ItemIsPacked);";
+      MySqlParameter description = new MySqlParameter();
+      description.ParameterName = "@ItemDescription";
+      description.Value = this.Description;
+      cmd.Parameters.Add(description);
+      MySqlParameter price = new MySqlParameter();
+      price.ParameterName = "@ItemPrice";
+      price.Value = this.Price;
+      cmd.Parameters.Add(price);
+      MySqlParameter manufacturer = new MySqlParameter();
+      manufacturer.ParameterName = "@ItemManufacturer";
+      manufacturer.Value = this.Manufacturer;
+      cmd.Parameters.Add(manufacturer);
+      MySqlParameter ispacked = new MySqlParameter();
+      ispacked.ParameterName = "@ItemIsPacked";
+      ispacked.Value = this.IsPacked;
+      cmd.Parameters.Add(ispacked);
+      cmd.ExecuteNonQuery();
+      Id = (int) cmd.LastInsertedId;
+
+      conn.Close();
+      if (conn != null)
+      {
+        conn.Dispose();
+      }
     }
   }
 }
