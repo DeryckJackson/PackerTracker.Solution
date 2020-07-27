@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MySql.Data.MySqlClient;
 
 namespace PackerTracker.Models
 {
@@ -7,22 +8,40 @@ namespace PackerTracker.Models
     public string Description { get; set; }
     public int Price { get; set; }
     public string Manufacturer { get; set; }
-    private static List<Item> _instances = new List<Item> {};
     public bool IsPacked { get; set; }
     public int Id { get; }
-    public Item (string description, int price, string manufacturer)
+    public Item (string description, int price, string manufacturer, bool isPacked, int id)
     {
       Description = description;
       Price = price;
       Manufacturer = manufacturer;
-      IsPacked = false;
-      _instances.Add(this);
-      Id = _instances.Count - 1;
+      IsPacked = isPacked;
+      Id = id;
     }
 
     public static List<Item> GetAll()
     {
-      return _instances;
+      List<Item> allItems = new List<Item>();
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"SELECT * FROM items;";
+      MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
+      while (rdr.Read())
+      {
+        string desc = rdr.GetString(0);
+        int price = rdr.GetInt32(1);
+        string manufacturer = rdr.GetString(2);
+        bool isPacked = rdr.GetBoolean(3);
+        int id = rdr.GetInt32(4);
+        allItems.Add(new Item(desc, price, manufacturer, isPacked, id));
+      }
+      conn.Close();
+      if (conn != null)
+      {
+        conn.Dispose();
+      }
+      return allItems;
     }
     public static void ClearAll()
     {
