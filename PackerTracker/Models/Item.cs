@@ -68,7 +68,40 @@ namespace PackerTracker.Models
 
     public static Item Find(int searchId)
     {
-      return _instances[searchId];
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+
+      MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"SELECT * FROM `items` WHERE id = @thisId;";
+
+      MySqlParameter thisId = new MySqlParameter();
+      thisId.ParameterName = "@thisId";
+      thisId.Value = searchId;
+      cmd.Parameters.Add(thisId);
+
+      MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
+      string desc = "";
+      int price = 0;
+      string manufacturer = "";
+      bool isPacked = false;
+      int id = 0;
+      while (rdr.Read())
+      {
+        desc = rdr.GetString(0);
+        price = rdr.GetInt32(1);
+        manufacturer = rdr.GetString(2);
+        isPacked = rdr.GetBoolean(3);
+        id = rdr.GetInt32(4);
+      }
+
+      Item foundItem = new Item(desc, price, manufacturer, isPacked, id);
+
+      conn.Close();
+      if (conn != null)
+      {
+        conn.Dispose();
+      }
+      return foundItem;
     }
 
     public static List<Item> GetUnpacked()
