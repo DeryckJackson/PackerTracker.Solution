@@ -5,5 +5,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="MySql" Version="5.5.14.1" />
+    <PackageReference Include="MySql.Data" Version="8.0.21" />
   </ItemGroup>
 </Project>
