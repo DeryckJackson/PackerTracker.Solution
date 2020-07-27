@@ -34,7 +34,7 @@ namespace PackerTracker.Models
       MySqlConnection conn = DB.Connection();
       conn.Open();
       MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"SELECT * FROM items;";
+      cmd.CommandText = @"SELECT * FROM item;";
       MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
       while (rdr.Read())
       {
@@ -57,7 +57,7 @@ namespace PackerTracker.Models
       MySqlConnection conn = DB.Connection();
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"DELETE FROM items;";
+      cmd.CommandText = @"DELETE FROM item;";
       cmd.ExecuteNonQuery();
       conn.Close();
       if (conn != null)
@@ -72,7 +72,7 @@ namespace PackerTracker.Models
       conn.Open();
 
       MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"SELECT * FROM `items` WHERE id = @thisId;";
+      cmd.CommandText = @"SELECT * FROM `item` WHERE id = @thisId;";
 
       MySqlParameter thisId = new MySqlParameter();
       thisId.ParameterName = "@thisId";
@@ -107,13 +107,27 @@ namespace PackerTracker.Models
     public static List<Item> GetUnpacked()
     {
       List<Item> outputList = new List<Item>();
-      foreach (Item item in _instances)
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"SELECT * FROM `item` WHERE ispacked = 0;";
+
+      MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
+      while (rdr.Read())
       {
-        if (!item.IsPacked)
-        {
-          outputList.Add(item);
-        }
+        string desc = rdr.GetString(0);
+        int price = rdr.GetInt32(1);
+        string manufacturer = rdr.GetString(2);
+        bool isPacked = rdr.GetBoolean(3);
+        int id = rdr.GetInt32(4);
+        outputList.Add(new Item(desc, price, manufacturer, isPacked, id));
       }
+      conn.Close();
+      if (conn != null)
+      {
+        conn.Dispose();
+      }
+
       return outputList;
     }
 
@@ -127,7 +141,7 @@ namespace PackerTracker.Models
       MySqlConnection conn = DB.Connection();
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"INSERT INTO items (description, price, manufacturer, ispacked) VALUES (@ItemDescription, @ItemPrice, @ItemManufacturer, @ItemIsPacked);";
+      cmd.CommandText = @"INSERT INTO item (description, price, manufacturer, ispacked) VALUES (@ItemDescription, @ItemPrice, @ItemManufacturer, @ItemIsPacked);";
       MySqlParameter description = new MySqlParameter();
       description.ParameterName = "@ItemDescription";
       description.Value = this.Description;

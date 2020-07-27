@@ -21,6 +21,7 @@ namespace PackerTracker.Controllers
     public ActionResult Create(string description, string price, string manufacturer)
     {
       Item myItem = new Item(description, int.Parse(price), manufacturer);
+      myItem.Save();
       return RedirectToAction("Index");
     }
 
